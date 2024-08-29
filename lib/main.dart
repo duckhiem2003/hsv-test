@@ -256,19 +256,19 @@ class _TakeTestButtonState extends State<TakeTestButton> {
 
   Future<void> submitPlaceholderResult() async {
     final placeholderAnswer = AnswerModel(
-      answer: 'Placeholder Answer',
+      answer: 'Empty Answer',
       point: 0,
     );
       final placeholderQuestion = QuestionModel(
-    question: 'Placeholder Question',
+    question: 'Empty Question',
     answers: [placeholderAnswer],
-    scenario: 'Placeholder Scenario',
+    scenario: 'Empty Scenario',
     url: 'https://example.com',
   );
     final placeholderUserAnswer = UserAnswerModel(
     point: 0,
     question: placeholderQuestion,
-    answer: 0,
+    answers: [-1],
     time: 0.0,
   );
   List<UserAnswerModel> placeholderAnswers = [placeholderUserAnswer];

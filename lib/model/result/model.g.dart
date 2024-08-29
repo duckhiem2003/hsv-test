@@ -12,7 +12,7 @@ ResultModel _$ResultModelFromJson(Map<String, dynamic> json) => ResultModel(
       answers: (json['Answers'] as List<dynamic>)
           .map((e) => UserAnswerModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-      point: json['Point'] as int,
+      point: (json['Point'] as num).toInt(),
       username: json['Username'] as String,
     );
 

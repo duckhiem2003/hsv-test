@@ -60,7 +60,7 @@ enum TestType {
           QuestionType.techCrossWork: 0,
           QuestionType.techFMCGUndestanding: 0,
           QuestionType.techProblem: 0,
-          QuestionType.scenario: 0,
+          QuestionType.scenario: 5,
           QuestionType.logical: 10,
           QuestionType.verbal: 10,
           QuestionType.critical: 10,

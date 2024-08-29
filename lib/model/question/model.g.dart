@@ -30,6 +30,7 @@ const _$QuestionTypeEnumMap = {
   QuestionType.scenario: 'scenario',
   QuestionType.verbal: 'verbal',
   QuestionType.logical: 'logical',
+  QuestionType.critical: 'critical',
   QuestionType.techVMT: 'Vietnam Market Trends',
   QuestionType.techPortfolio: 'Portfolio Strategy',
   QuestionType.techConsumerNeed: 'Consumer Needs',

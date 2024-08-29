@@ -116,17 +116,25 @@ class TestResultPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 5),
-                          if(answer.answer>=0)
-                          Text(
-                            'Selected Answer: ${answerList[answer.answer].answer}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: answerList[answer.answer].point == 1
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                          ),
-                          if(answer.answer<0)
+                          if (answer.answers.isNotEmpty) 
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: answer.answers.map((index) {
+      if (index >= 0 && index < answerList.length) {
+        final selectedAnswer = answerList[index];
+        return Text(
+          'Selected Answer: ${selectedAnswer.answer}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: selectedAnswer.point == 1 ? Colors.green : Colors.red,
+          ),
+        );
+      } else {
+        return Container(); 
+      }
+    }).toList(),
+  ),
+                          if(answer.answers.length==1&&answer.answers[0]==-1)
                           const Text(
                             'Selected Answer: None',
                             style: TextStyle(

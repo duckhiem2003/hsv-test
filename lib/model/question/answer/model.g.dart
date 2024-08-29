@@ -8,7 +8,7 @@ part of 'model.dart';
 
 AnswerModel _$AnswerModelFromJson(Map<String, dynamic> json) => AnswerModel(
       answer: json['Answer'] as String,
-      point: json['Point'] as int,
+      point: (json['Point'] as num).toInt(),
     );
 
 Map<String, dynamic> _$AnswerModelToJson(AnswerModel instance) =>

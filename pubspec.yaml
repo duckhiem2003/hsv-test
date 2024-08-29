@@ -26,6 +26,7 @@ dependencies:
   syncfusion_flutter_charts: ^ 25.2.4
   fl_chart: ^0.68.0
   marquee_list: ^1.0.0
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:
