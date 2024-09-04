@@ -1,22 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:web_test/model/question/model.dart';
 import 'package:web_test/model/result/model.dart';
 
 class TestResultPage extends StatelessWidget {
   final ResultModel result;
 
-  TestResultPage({required this.result});
+  const TestResultPage({super.key, required this.result});
+
+    int getQuestionScore(QuestionModel question) {
+    if(question.category==QuestionCategory.practice){
+      if(question.level==QuestionLevel.medium){
+        return 2;
+      }
+      else{
+        return 4;
+      }
+    }
+    else{
+      return 1;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Test Result'),
+        title: Text('Kết quả chi tiết'),
         actions: [
           IconButton(
             icon: Icon(Icons.download),
             onPressed: () async {
-
+              // Add download functionality here if needed
             },
           ),
         ],
@@ -27,20 +42,18 @@ class TestResultPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Username: ${result.username}',
+              'Nhóm: ${result.username}',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Text('Test Type: ${result.type.toString()}'),
-            SizedBox(height: 10),
-            Text('Points: ${result.point}'),
+            Text('Điểm số: ${result.point}'),
             SizedBox(height: 10),
             Text(
-              'Time Taken: ${Duration(seconds: result.time.toInt()).toString().split('.').first}',
+              'Thời gian làm bài: ${Duration(seconds: result.time.toInt()).toString().split('.').first}',
             ),
             SizedBox(height: 20),
             Text(
-              'Questions and Answers:',
+              'Câu hỏi và trả lời:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
@@ -52,6 +65,10 @@ class TestResultPage extends StatelessWidget {
                   final question = answer.question;
                   final answerLength = question.answers.length;
                   final answerList = question.answers;
+                  final questionLevel = question.level;
+                  final questionCategory = question.category; // Assuming 'category' field exists
+                  final answerScore = answer.point; // Score assigned based on question level and answers
+                  final questionScore = getQuestionScore(question);
 
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 5),
@@ -60,14 +77,31 @@ class TestResultPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          
                           Text(
-                            'Question ${index + 1}: ${question.question}',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            'Loại câu hỏi: $questionCategory',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                          ),
+                          Text(
+                            'Mức độ: $questionLevel',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                          ),
+                          Text(
+                            'Điểm số câu hỏi: $questionScore',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                          ),
+                          Text(
+                            'Điểm số câu trả lời: $answerScore',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                          ),
+                          Text(
+                            'Câu hỏi ${index + 1}: ${question.question}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           if (question.scenario != null && question.scenario!.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5.0),
-                              child: Text('Scenario: ${question.scenario}'),
+                              child: Text('Chủ đề chi tiết: ${question.scenario}'),
                             ),
                           if (question.url != null && question.url!.isNotEmpty)
                             Center(
@@ -97,53 +131,52 @@ class TestResultPage extends StatelessWidget {
                             ),
                           const SizedBox(height: 10),
                           SizedBox(
-                            height: 150, 
+                            height: 150,
                             child: ListView.builder(
                               itemCount: answerLength,
                               itemBuilder: (context, answerIndex) {
                                 return Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    'Answer ${answerIndex + 1}: ${answerList[answerIndex].answer}',
+                                    'Đáp án ${answerIndex + 1}: ${answerList[answerIndex].answer}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: answerList[answerIndex].point == 1 ? Colors.green : Colors.black,
                                     ),
-                                    
                                   ),
                                 );
                               },
                             ),
                           ),
                           const SizedBox(height: 5),
-                          if (answer.answers.isNotEmpty) 
-  Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: answer.answers.map((index) {
-      if (index >= 0 && index < answerList.length) {
-        final selectedAnswer = answerList[index];
-        return Text(
-          'Selected Answer: ${selectedAnswer.answer}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: selectedAnswer.point == 1 ? Colors.green : Colors.red,
-          ),
-        );
-      } else {
-        return Container(); 
-      }
-    }).toList(),
-  ),
-                          if(answer.answers.length==1&&answer.answers[0]==-1)
-                          const Text(
-                            'Selected Answer: None',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
+                          if (answer.answers.isNotEmpty)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: answer.answers.map((index) {
+                                if (index >= 0 && index < answerList.length) {
+                                  final selectedAnswer = answerList[index];
+                                  return Text(
+                                    'Câu đã chọn: ${selectedAnswer.answer}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: selectedAnswer.point == 1 ? Colors.green : Colors.red,
+                                    ),
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              }).toList(),
                             ),
-                          ),
+                          if (answer.answers.length == 1 && answer.answers[0] == -1)
+                            const Text(
+                              'Chưa chọn câu trả lời',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
                           Text(
-                            'Time Spent: ${Duration(seconds: answer.time.toInt()).toString().split('.').first}',
+                            'Thời gian: ${Duration(seconds: answer.time.toInt()).toString().split('.').first}',
                           ),
                         ],
                       ),

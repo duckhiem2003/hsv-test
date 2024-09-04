@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:web_test/model/result/model.dart';
 import 'package:web_test/service/result.dart';
 import 'package:web_test/ui/admin/widget/drawer.dart';
-import 'package:web_test/ui/admin/widget/point_spectrum.dart';
 import 'package:web_test/ui/admin/widget/result.dart';
 
 class AdminPage extends StatefulWidget {
@@ -51,7 +50,7 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Title(
-      title: 'Online\'s Test | Admin',
+      title: 'Online Test Tầm Nhìn Thương Hiệu',
       color: Theme.of(context).primaryColor,
       child: Scaffold(
         body: Row(
@@ -77,7 +76,7 @@ class _AdminPageState extends State<AdminPage> {
                             ),
                             const SizedBox(width: 10),
                             const Text(
-                              'Hello Admin',
+                              'Chào admin',
                               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -286,7 +285,7 @@ class _AdminPageState extends State<AdminPage> {
                                         controller: _pageController,
                                         children: [
                                           SingleChildScrollView(child: TestResultWidget(results: results)),
-                                          SingleChildScrollView(child: PointSpectrumWidget(results: results)),
+                                          // SingleChildScrollView(child: PointSpectrumWidget(results: results)),
                                         ],
                                       ),
                                     ),

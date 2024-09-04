@@ -14,7 +14,11 @@ QuestionModel _$QuestionModelFromJson(Map<String, dynamic> json) =>
           .toList(),
       scenario: json['Scenario'] as String?,
       url: json['Url'] as String?,
-    )..type = $enumDecodeNullable(_$QuestionTypeEnumMap, json['Type']);
+      type: $enumDecodeNullable(_$QuestionTypeEnumMap, json['Type']),
+      shuffle: json['Shuffle'] as bool?,
+      category: $enumDecode(_$QuestionCategoryEnumMap, json['Category']),
+      level: $enumDecode(_$QuestionLevelEnumMap, json['Level']),
+    );
 
 Map<String, dynamic> _$QuestionModelToJson(QuestionModel instance) =>
     <String, dynamic>{
@@ -22,21 +26,24 @@ Map<String, dynamic> _$QuestionModelToJson(QuestionModel instance) =>
       'Url': instance.url,
       'Scenario': instance.scenario,
       'Answers': instance.answers,
+      'Shuffle': instance.shuffle,
       'Type': _$QuestionTypeEnumMap[instance.type],
+      'Category': _$QuestionCategoryEnumMap[instance.category]!,
+      'Level': _$QuestionLevelEnumMap[instance.level]!,
     };
 
 const _$QuestionTypeEnumMap = {
-  QuestionType.numerical: 'numerical',
-  QuestionType.scenario: 'scenario',
-  QuestionType.verbal: 'verbal',
-  QuestionType.logical: 'logical',
-  QuestionType.critical: 'critical',
-  QuestionType.techVMT: 'Vietnam Market Trends',
-  QuestionType.techPortfolio: 'Portfolio Strategy',
-  QuestionType.techConsumerNeed: 'Consumer Needs',
-  QuestionType.techDigitalMarketing: 'Digital Marketing',
-  QuestionType.techProductLaunching: 'Product Launching',
-  QuestionType.techCrossWork: 'Cross-work & Conflict Resolution',
-  QuestionType.techFMCGUndestanding: 'FMCG Understanding',
-  QuestionType.techProblem: 'Problem-Solving and Strategic Thinking',
+  QuestionType.multipleChoice: 'multipleChoice',
+  QuestionType.singleChoice: 'singleChoice',
+};
+
+const _$QuestionCategoryEnumMap = {
+  QuestionCategory.theory: 'theory',
+  QuestionCategory.practice: 'practice',
+};
+
+const _$QuestionLevelEnumMap = {
+  QuestionLevel.easy: 'easy',
+  QuestionLevel.medium: 'medium',
+  QuestionLevel.hard: 'hard',
 };

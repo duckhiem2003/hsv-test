@@ -3,28 +3,12 @@ import 'package:web_test/model/question/answer/model.dart';
 part 'model.g.dart';
 
 enum QuestionType {
-  numerical,
-  scenario,
-  verbal,
-  logical,
-  critical,
-  @JsonValue('Vietnam Market Trends')
-  techVMT,
-  @JsonValue('Portfolio Strategy')
-  techPortfolio,
-  @JsonValue('Consumer Needs')
-  techConsumerNeed,
-  @JsonValue('Digital Marketing')
-  techDigitalMarketing,
-  @JsonValue('Product Launching')
-  techProductLaunching,
-  @JsonValue('Cross-work & Conflict Resolution')
-  techCrossWork,
-  @JsonValue('FMCG Understanding')
-  techFMCGUndestanding,
-  @JsonValue('Problem-Solving and Strategic Thinking')
-  techProblem;
+  multipleChoice,
+  singleChoice,
 }
+enum QuestionCategory { theory, practice }
+
+enum QuestionLevel { easy, medium, hard }
 
 @JsonSerializable(fieldRename: FieldRename.pascal)
 class QuestionModel {
@@ -32,13 +16,21 @@ class QuestionModel {
   final String? url;
   final String? scenario;
   final List<AnswerModel> answers;
+  final bool? shuffle;
+
   QuestionType? type;
+  final QuestionCategory category;
+  final QuestionLevel level;
 
   QuestionModel({
     required this.question,
     required this.answers,
     this.scenario,
     this.url,
+    this.type,
+    required this.shuffle,
+    required this.category,
+    required this.level,
   });
 
   factory QuestionModel.fromJson(Map<String, dynamic> json) => _$QuestionModelFromJson(json);

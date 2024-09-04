@@ -14,6 +14,7 @@ ResultModel _$ResultModelFromJson(Map<String, dynamic> json) => ResultModel(
           .toList(),
       point: (json['Point'] as num).toInt(),
       username: json['Username'] as String,
+      tabSwitch: (json['TabSwitch'] as num).toInt(),
     );
 
 Map<String, dynamic> _$ResultModelToJson(ResultModel instance) =>
@@ -23,6 +24,7 @@ Map<String, dynamic> _$ResultModelToJson(ResultModel instance) =>
       'Point': instance.point,
       'Answers': instance.answers,
       'Username': instance.username,
+      'TabSwitch': instance.tabSwitch,
     };
 
 const _$TestTypeEnumMap = {

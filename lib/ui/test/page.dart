@@ -45,69 +45,65 @@ class _TestPageState extends State<TestPage> {
   }
 
   Future<void> getQuestions() async {
-    List<QuestionModel> numericalQuestions = [];
-    // List<QuestionModel> technicalQuestions = [];
-    List<QuestionModel> scenarioQuestions = [];
-    List<QuestionModel> logicalQuestions = [];
-    List<QuestionModel> verbalQuestions = [];
-    List<QuestionModel> criticalQuestions = [];
+    List<QuestionModel> theoryQuestions = [];
+    List<QuestionModel> practiceQuestions = [];
+    List<QuestionModel> allQuestions= [];
 
     LoadingUtility.show();
     try {
       await Future.wait([
-        () async {
-          scenarioQuestions = await service.getScenarioQuestion();
-          scenarioQuestions = getRandomQuestions(QuestionType.scenario, scenarioQuestions);
+        ()async{
+          allQuestions = await service.getAllQuestions();
         }.call(),
-        () async {
-          numericalQuestions = await service.getNumericalQuestion();
-          numericalQuestions = getRandomQuestions(QuestionType.numerical, numericalQuestions);
-        }.call(),
-        () async {
-          logicalQuestions = await service.getLogicalQuestion();
-          logicalQuestions = getRandomQuestions(QuestionType.logical, logicalQuestions);
-        }.call(),
-        () async {
-          verbalQuestions = await service.getVerbalQuestion();
-          verbalQuestions = getRandomQuestions(QuestionType.verbal, verbalQuestions);
-        }.call(),
-        () async {
-          criticalQuestions = await service.getCriticalQuestion();
-          criticalQuestions = getRandomQuestions(QuestionType.critical, criticalQuestions);
-        }.call(),
-        // () async {
-        //   final questions = await service.getTechnicalQuestions();
-        //   for (var type in QuestionType.values) {
-        //     if (type == QuestionType.numerical) {
-        //       continue;
-        //     }
-        //     if (type == QuestionType.scenario) {
-        //       continue;
-        //     }
-        //     technicalQuestions.addAll(getRandomQuestions(type, questions));
-        //   }
-        //   technicalQuestions.shuffle();
-        // }.call(),
-        // () async {
-        //   scenarioQuestions = await service.getScenarioQuestion();
-        //   scenarioQuestions = getRandomQuestions(QuestionType.scenario, scenarioQuestions);
-        //   scenarioQuestions.sort((a, b) => (a.scenario ?? '').compareTo(b.scenario ?? ''));
-        // }.call(),
+        
       ]);
     } catch (e) {
       logger.e(e);
     } finally {
+
+    theoryQuestions = allQuestions.where((q) => q.category == QuestionCategory.theory).toList();
+    practiceQuestions = allQuestions.where((q) => q.category == QuestionCategory.practice).toList();
+
+    theoryQuestions.shuffle();
+    practiceQuestions.shuffle();
+
+
+    List<QuestionModel> easyTheory = theoryQuestions.where((q) => q.level == QuestionLevel.easy).take(15).toList();
+    List<QuestionModel> mediumTheory = theoryQuestions.where((q) => q.level == QuestionLevel.medium).take(5).toList();
+    // List<QuestionModel> hardTheory = theoryQuestions.where((q) => q.level == QuestionLevel.hard).take(1).toList();
+
+    // List<QuestionModel> easyPractice = practiceQuestions.where((q) => q.level == QuestionLevel.easy).take(1).toList();
+    List<QuestionModel> mediumPractice = practiceQuestions.where((q) => q.level == QuestionLevel.medium).take(10).toList();
+    List<QuestionModel> hardPractice = practiceQuestions.where((q) => q.level == QuestionLevel.hard).take(15).toList();
       questions = [
-        ...scenarioQuestions,
-        ...numericalQuestions,
-        // ...technicalQuestions,
-        // ...scenarioQuestions,
-        ...logicalQuestions,
-        ...verbalQuestions,
-        ...criticalQuestions,
+      ...easyTheory,
+      ...mediumTheory,
+      // ...hardTheory,
+      // ...easyPractice,
+      ...mediumPractice,
+      ...hardPractice,
+
       ];
+
+          final typeCounts = {
+      for (var type in QuestionType.values)
+        type: questions.where((q) => q.type == type).length
+    };
+
+    final categoryCounts = {
+      for (var category in QuestionCategory.values)
+        category: questions.where((q) => q.category == category).length
+    };
+
+    final levelCounts = {
+      for (var level in QuestionLevel.values)
+        level: questions.where((q) => q.level == level).length
+    };
+    logger.i('Question Type Counts: $typeCounts');
+    logger.i('Category Counts: $categoryCounts');
+    logger.i('Level Counts: $levelCounts');
       questions.shuffle();
-      final username = await LocalStorageUtility.getData('username');
+      var username = await LocalStorageUtility.getData('username');
       res = ResultModel(
         username: username ?? '',
         type: widget.type,
@@ -122,16 +118,10 @@ class _TestPageState extends State<TestPage> {
           ),
         ),
         point: 0,
+        tabSwitch:0,
       );
       for (var question in questions) {
-        if(question.type == QuestionType.scenario){
-          continue;
-        }
-        else if (question.type == QuestionType.logical) {
-          question.answers.sort((a, b) => a.answer.compareTo(b.answer));
-        } else if (question.type == QuestionType.verbal||question.type == QuestionType.critical) {
-          question.answers.sort((a, b) => b.answer.compareTo(a.answer));
-        } else {
+        if(question.shuffle==true){
           question.answers.shuffle();
         }
         answers.add([-1]);
@@ -154,11 +144,15 @@ class _TestPageState extends State<TestPage> {
     }
   }
 
-  List<QuestionModel> getRandomQuestions(QuestionType type, List<QuestionModel> questions) {
-    final questionTypes = questions.where((element) => element.type == type).toList();
-    final totalQuestions = widget.type.testStructure[type] ?? 0;
-    questionTypes.shuffle();
-    return questionTypes.getRange(0, totalQuestions).toList();
+    void _enterFullscreen() {
+    final element = html.document.documentElement;
+    if (element != null) {
+      element.requestFullscreen();
+    }
+  }
+
+  void _exitFullscreen() {
+    html.document.exitFullscreen();
   }
 
   @override
@@ -166,7 +160,7 @@ class _TestPageState extends State<TestPage> {
     time = widget.type.timeToComplete * 50;
     questions = [];
     getQuestions();
-
+    _enterFullscreen();
     html.document.onVisibilityChange.listen((event) {
       if (html.document.hidden!) {
         if (SwitchedTabsTime<3) {
@@ -177,6 +171,18 @@ class _TestPageState extends State<TestPage> {
         }
       }
     });
+  //     html.document.onFullscreenChange.listen((event) {
+  //       logger.i(html.document.fullscreenElement);
+  //   if (html.document.fullscreenElement==null) {
+      
+  //     SwitchedTabsTime++;
+  //     if (SwitchedTabsTime < 3) {
+  //       _showTabSwitchDialog();
+  //     } else {
+  //       _autoSubmit();
+  //     }
+  //   }
+  // });
     super.initState();
   }
 
@@ -195,8 +201,8 @@ Future<void> _showTabSwitchDialog() async {
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
-      title: const Text('Warning', style: TextStyle(color: Colors.red)),
-      content: Text('You have switched tabs $SwitchedTabsTime times.\nSwitching more than 3 times will automatically submit the test.'),
+      title: const Text('Cảnh báo', style: TextStyle(color: Colors.red)),
+      content: Text('Bạn đã đổi tab $SwitchedTabsTime lần.\nĐổi tab quá 3 lần sẽ tự động nộp bài kiểm tra.'),
       actions: [
         TextButton(
           onPressed: () {
@@ -228,21 +234,31 @@ Future<void> _autoSubmit() async {
 void onChangeQuestion(int newIndex) {
   res.answers[currentIndex].answers = answers[currentIndex];
 
-  final correctAnswers = questions[currentIndex].answers
-      .asMap()
-      .entries
-      .where((entry) => entry.value.point == 1)
-      .map((entry) => entry.key)
-      .toSet();
+final correctAnswers = questions[currentIndex].answers
+    .asMap()
+    .entries
+    .where((entry) => entry.value.point == 1)
+    .map((entry) => entry.key)
+    .toSet();
 
   final userAnswers = answers[currentIndex].toSet();
+  if(const SetEquality().equals(userAnswers, correctAnswers)){
+    if(questions[currentIndex].category == QuestionCategory.theory){
+      res.answers[currentIndex].point=1;
+    }
+    else if(questions[currentIndex].level==QuestionLevel.medium){
+      res.answers[currentIndex].point=2;
+    }
+    else{
+      res.answers[currentIndex].point=4;
+    }
+  }
 
-  res.answers[currentIndex].point =
-      const SetEquality().equals(userAnswers, correctAnswers) ? 1 : 0;
 
   logger.i('Correct Answers: $correctAnswers\nUser Answers: $userAnswers');
 
   res.answers[currentIndex].time += ((DateTime.now().millisecondsSinceEpoch - startTime.millisecondsSinceEpoch) / 1000);
+  
 
   if (newIndex == -1) {
     onSubmit(context);
@@ -292,7 +308,7 @@ void onChangeQuestion(int newIndex) {
                           Builder(builder: (context) {
                             final question = questions[currentIndex];
                             final answer = answers[currentIndex];
-                            final isMultipleChoice = question.type == QuestionType.scenario;
+                            final isMultipleChoice = question.type == QuestionType.multipleChoice;
                             return QuestionWidget(
                               question: question,
                               index: currentIndex,
@@ -357,7 +373,7 @@ void onChangeQuestion(int newIndex) {
                                     ),
                                   ),
                                   child: Text(
-                                    'Next',
+                                    'Tiếp',
                                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                 ),
@@ -394,7 +410,7 @@ void onChangeQuestion(int newIndex) {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'Remaining Time: '.toUpperCase(),
+                              'Thời gian còn lại: '.toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -464,7 +480,7 @@ void onChangeQuestion(int newIndex) {
                     const SizedBox(height: 30),
                     SizedBox(
                       height: 40,
-                      width: 80,
+                      width: 100,
                       child: FilledButton(
                         style: ButtonStyle(
                           shape: MaterialStatePropertyAll(
@@ -476,7 +492,7 @@ void onChangeQuestion(int newIndex) {
                         onPressed: () {
                           onChangeQuestion(-1);
                         },
-                        child: const Text('Submit'),
+                        child: const Text('Nộp bài'),
                       ),
                     ),
                   ],
@@ -493,15 +509,15 @@ void onChangeQuestion(int newIndex) {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Submit Alert?'),
-        content: const Text('Are you sure you want to submit this?'),
+        title: const Text('Nộp bài?'),
+        content: const Text('Bạn có chắc chắc là muốn nộp bài chưa?'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
             child: const Text(
-              'Cancel',
+              'Hủy',
               style: TextStyle(
                 color: Colors.red,
                 fontSize: 18,
@@ -511,9 +527,10 @@ void onChangeQuestion(int newIndex) {
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
+              _exitFullscreen();
             },
             child: const Text(
-              'Submit',
+              'Nộp bài',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18,
@@ -532,6 +549,7 @@ void onChangeQuestion(int newIndex) {
             time += res.answers[i].time;
             point += res.answers[i].point;
           }
+          res.tabSwitch = SwitchedTabsTime;
           res.time = time;
           res.point = point;
           resService.submitResult(res);
@@ -543,15 +561,15 @@ void onChangeQuestion(int newIndex) {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Thank you'),
-            content: const Text('Thank you for your effort and time. We will inform you of your test result soon.'),
+            title: const Text('Xin cảm ơn'),
+            content: const Text('Cảm ơn bạn đã dành thời gian và công sức để làm bài.\nKết quả sẽ được chúng mình gửi lại sớm nhất'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context, true);
                 },
                 child: const Text(
-                  'Done',
+                  'Ok',
                   style: TextStyle(color: Colors.blue),
                 ),
               ),
@@ -570,8 +588,8 @@ void onChangeQuestion(int newIndex) {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Warning',style: TextStyle(color: Colors.red),),
-        content: const Text('You have switched tabs too many time\nYour test will be automatically submitted'),
+        title: const Text('Cảnh báo',style: TextStyle(color: Colors.red),),
+        content: const Text('Bạn đã đổi tab quá nhiều lần \nBài thi của bạn sẽ được tự động nộp'),
         actions: [
 
           TextButton(
@@ -579,7 +597,7 @@ void onChangeQuestion(int newIndex) {
               Navigator.pop(context, true);
             },
             child: const Text(
-              'Submit',
+              'Nộp bài',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18,
@@ -598,6 +616,7 @@ void onChangeQuestion(int newIndex) {
             time += res.answers[i].time;
             point += res.answers[i].point;
           }
+          res.tabSwitch = SwitchedTabsTime;
           res.time = time;
           res.point = point;
           resService.submitResult(res);
@@ -609,15 +628,16 @@ void onChangeQuestion(int newIndex) {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Thank you'),
-            content: const Text('VCO thank you for your effort and time. We will inform you of your test result soon.'),
+            title: const Text('Xin cảm ơn',style: TextStyle(color: Colors.green),),
+            content: const Text('Cảm ơn bạn đã dành thời gian và công sức để làm bài.\nKết quả sẽ được chúng mình gửi lại sớm nhất'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context, true);
+                  _exitFullscreen();
                 },
                 child: const Text(
-                  'Done',
+                  'OK',
                   style: TextStyle(color: Colors.blue),
                 ),
               ),
@@ -695,7 +715,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
 
   Widget answer() {
     switch (widget.question.type) {
-      case QuestionType.scenario:
+      case QuestionType.multipleChoice:
         return multipleChoiceAnswer();
       default:
         return singleChoiceAnswer();
@@ -789,19 +809,37 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     );
   }
 
-  Widget imageWithQuestion() {
-    final url = widget.question.url;
-    RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
-    Match? match = regExp.firstMatch(url ?? '');
-    String? fileId = match?.group(1);
-    return fileId != null
-        ? Image.network(
-            'https://lh3.googleusercontent.com/d/$fileId',
-            width: double.infinity,
-            fit: BoxFit.fitWidth,
-          )
-        : Container();
-  }
+Widget imageWithQuestion() {
+  final url = widget.question.url;
+  // Adjust regex to match Google Drive file ID correctly.
+  RegExp regExp = RegExp(r"(?:/d/|id=)([a-zA-Z0-9_-]+)");
+  Match? match = regExp.firstMatch(url ?? '');
+  String? fileId = match?.group(1);
+
+  // If the file ID is extracted, construct the correct image URL.
+  return fileId != null
+      ? Image.network(
+          'https://lh3.googleusercontent.com/d/$fileId',
+          width: double.infinity,
+          fit: BoxFit.fitWidth,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            // Display a loading spinner while the image is loading.
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Text('Image failed to load');
+          },
+        )
+      : Container(); // Return an empty container if no file ID is found.
+}
 
   @override
   Widget build(BuildContext context) {
@@ -814,12 +852,9 @@ class _QuestionWidgetState extends State<QuestionWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (widget.question.scenario != null && widget.question.scenario!.isNotEmpty)
               Text(
-                widget.question.type == QuestionType.verbal
-                    ? 'Scenario: ${widget.question.scenario}'
-                    : widget.question.type == QuestionType.critical
-                        ? 'Statement: ${widget.question.scenario}'
-                        : '',
+                "Chủ đề:${widget.question.scenario}",
                 style: TextStyle(
                   fontSize: 24.sp,
                   color: const Color(0xFF838282),
@@ -827,9 +862,10 @@ class _QuestionWidgetState extends State<QuestionWidget> {
                   height: 1.5,
                 ),
               ),
+              
               SizedBox(height: 10.h),
               Text(
-                'Question #${widget.index + 1}:',
+                'Câu hỏi #${widget.index + 1}:',
                 style: TextStyle(
                   fontSize: 22.sp,
                   color: Colors.black,
@@ -847,9 +883,7 @@ class _QuestionWidgetState extends State<QuestionWidget> {
               ),
               SizedBox(height: 20.h),
               if (widget.question.url != null &&
-                  widget.question.url!.isNotEmpty &&
-                  (widget.question.type == QuestionType.numerical ||
-                      widget.question.type == QuestionType.logical))
+                  widget.question.url!.isNotEmpty )
                 Center(child: imageWithQuestion()),
               answer(),
             ],

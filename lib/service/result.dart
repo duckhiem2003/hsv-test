@@ -7,10 +7,11 @@ import 'package:web_test/service/local.dart';
 final logger = Logger();
 class ResultService {
   Future<void> submitResult(ResultModel result) async {
-    final username = await LocalStorageUtility.getData('username');
+    var username = await LocalStorageUtility.getData('username');
     if (username == null) {
       return;
     }
+    username = username.replaceAll('.', ',');
     final data = FirebaseDatabase.instance.ref('Result/$username');
     data.set(
       jsonDecode(jsonEncode(result.toJson())),
@@ -18,10 +19,14 @@ class ResultService {
   }
 
   Future<ResultModel?> getResult() async {
-    final username = await LocalStorageUtility.getData('username');
+    var username = await LocalStorageUtility.getData('username');
+    
     if (username == null) {
       return null;
     }
+
+    username = username.replaceAll('.', ',');
+
     final response = await FirebaseDatabase.instance.ref('Result/$username').get();
     if (response.exists) {
       final data = jsonDecode(

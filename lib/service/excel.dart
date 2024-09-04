@@ -53,6 +53,9 @@ class ExcelService {
             final duration = Duration(seconds: data.time.toInt());
             value = TextCellValue(printDuration(duration));
             break;
+          case DataColName.tabSwitch:
+            value = IntCellValue(data.tabSwitch);
+            break;
           case DataColName.detail:
             break;
         }

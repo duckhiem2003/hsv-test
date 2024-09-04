@@ -10,7 +10,8 @@ enum DataColName {
   username,
   result,
   time,
-  detail; 
+  tabSwitch, 
+  detail,
 }
 
 class TestResultWidget extends StatefulWidget {
@@ -35,6 +36,8 @@ class _TestResultWidgetState extends State<TestResultWidget> {
   @override
   Widget build(BuildContext context) {
     const cols = DataColName.values;
+    List<ResultModel> sortedResults = List.from(widget.results)
+      ..sort((a, b) => b.point.compareTo(a.point));
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +46,7 @@ class _TestResultWidgetState extends State<TestResultWidget> {
           children: [
             Expanded(
               child: Text(
-                'Test\'s result',
+                'Kết quả kiểm tra',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -54,11 +57,14 @@ class _TestResultWidgetState extends State<TestResultWidget> {
               onPressed: () async {
                 await excelService.createExcel(widget.results);
               },
-              child: const Text('Export Data'),
+              child: const Text('Xuất dữ liệu'),
             ),
           ],
         ),
         Table(
+          columnWidths: const {
+            1: FlexColumnWidth(3),
+          },
           children: [
             TableRow(
               decoration: BoxDecoration(
@@ -83,7 +89,7 @@ class _TestResultWidgetState extends State<TestResultWidget> {
                 ),
               ),
             ),
-            ...widget.results.asMap().entries.map(
+            ...sortedResults.asMap().entries.map(
               (e) {
                 return TableRow(
                   decoration: BoxDecoration(
@@ -113,6 +119,9 @@ class _TestResultWidgetState extends State<TestResultWidget> {
                             ),
                           );
                           break;
+                        case DataColName.tabSwitch:
+                          content = Text(e.value.tabSwitch.toString());
+                          break;
                         case DataColName.detail:
                           content = GestureDetector(
                             onTap: () {
@@ -124,9 +133,9 @@ class _TestResultWidgetState extends State<TestResultWidget> {
                                 ),
                               );
                             },
-                            child: Icon(
+                            child: const Icon(
                               Icons.arrow_forward,
-                              size: 16.0, // Smaller icon size
+                              size: 16.0, 
                             ),
                           );
                           break;
